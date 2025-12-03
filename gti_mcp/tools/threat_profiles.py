@@ -13,48 +13,9 @@
 # limitations under the License.
 import typing
 
-from mcp.server.fastmcp import Context
+from mcp.server.fastmcp import FastMCP, Context
 
 from .. import utils
-from ..fastmcp_instance import server, vt_client
-
-
-@server.tool()
-async def list_threat_profiles(
-    ctx: Context, limit: int = 10
-) -> typing.List[typing.Dict[str, typing.Any]]:
-  """List your Threat Profiles at Google Threat Intelligence.
-
-  Threat Profiles filter all of Google TI's threat intelligence
-  so you can focus only on the threats that matter most
-  to your organization.
-
-  Threat Profiles let you apply top-level filters
-  for Target Industries and Target Regions to immediately provide
-  a more focused view of relevant threats.
-
-  When searching for threats, we must use this tool first to check
-  if there is any Threat Profile that matches the user query
-  before peforming a general search using the `search_threats` tool.
-
-  Recommendations from Threat Profiles are more relevants to users
-  than generic search threats. Use them as long as
-  they match user's query.
-
-  Returns:
-    List of Threat Profiles.
-  """
-  async with vt_client(ctx) as client:
-    res = await utils.consume_vt_iterator(
-        client, "/threat_profiles", limit=limit
-    )
-  return utils.sanitize_response([o.to_dict() for o in res])
-
-
-@server.tool()
-async def get_threat_profile(
-    profile_id: str, ctx: Context
-) -> typing.Dict[str, typing.Any]:
   """Get Threat Profile object.
 
   A threat profile object contains the following attributes:

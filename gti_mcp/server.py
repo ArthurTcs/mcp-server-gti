@@ -22,35 +22,30 @@ import vt
 
 from mcp.server.fastmcp import FastMCP, Context
 
+# Import tool modules
+from gti_mcp.tools import (
+    collections,
+    files,
+    intelligence,
+    netloc,
+    threat_profiles,
+    urls,
+)
+
 logging.basicConfig(level=logging.ERROR)
-
-
-def _vt_client_factory(unused_ctx) -> vt.Client:
-  api_key = os.getenv("VT_APIKEY")
-  if not api_key:
-    raise ValueError("VT_APIKEY environment variable is required")
-  return vt.Client(api_key)
-
-vt_client_factory = _vt_client_factory
-
-
-@asynccontextmanager
-async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
-  """Provides a vt.Client instance for the current request."""
-  client = vt_client_factory(ctx)
-
-  try:
-    yield client
-  finally:
-    await client.close_async()
 
 # Create a named server and specify dependencies for deployment and development
 server = FastMCP(
     "Google Threat Intelligence MCP server"
 )
 
-# Load tools.
-from gti_mcp.tools import *
+# Register tools
+collections.register_tools(server)
+files.register_tools(server)
+intelligence.register_tools(server)
+netloc.register_tools(server)
+threat_profiles.register_tools(server)
+urls.register_tools(server)
 
 # Run the server
 def main():
