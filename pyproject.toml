@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gti-mcp"
+version = "0.1.2"
+description = "Google Threat Intelligence MCP server"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp",
+    "vt-py",
+    "uvicorn",
+    "starlette",
+    "python-dotenv"
+]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest_httpserver", "pytest_asyncio"]
+
+[tool.setuptools.packages]
+find = {} 
+
+[project.scripts]
+gti_mcp = "gti_mcp.server:main"
