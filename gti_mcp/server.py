@@ -65,21 +65,29 @@ from gti_mcp.tools import *
 
 # Run the server
 def main():
-  # Check if running in Cloud Run (or any environment with PORT env var)
-  port = os.getenv('PORT')
-  logger.info(f"Starting GTI MCP Server - PORT env var: {port}")
-  
-  if port:
-    # Running in Cloud Run or similar - use SSE transport
-    # FastMCP uses environment variables for port configuration
-    logger.info(f"Running in Cloud Run mode with SSE transport on 0.0.0.0:{port}")
-    os.environ['HOST'] = '0.0.0.0'
-    server.run(transport='sse')
-  else:
-    # Running locally - use stdio transport
-    logger.info("Running in local mode with stdio transport")
-    server.run(transport='stdio')
+  server.run(transport='stdio')
 
 
 if __name__ == '__main__':
   main()
+
+# Expose ASGI app for Cloud Run
+# FastMCP instance itself is not an ASGI app, we need to extract/create it.
+try:
+    if hasattr(server, 'create_asgi_app') and callable(server.create_asgi_app):
+        app = server.create_asgi_app()
+    elif hasattr(server, 'sse_app') and callable(server.sse_app):
+        app = server.sse_app()
+    elif hasattr(server, 'sse_app'):
+        app = server.sse_app
+    elif hasattr(server, '_mcp_server') and hasattr(server._mcp_server, 'app'):
+        app = server._mcp_server.app
+    else:
+        # Fallback: maybe it IS callable?
+        app = server
+except Exception as e:
+    logger.error(f"Error creating ASGI app: {e}")
+    # If we can't find the app, uvicorn will likely fail when importing 'app',
+    # but we want to allow the module to import successfully if just running main().
+    app = None
+

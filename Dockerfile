@@ -37,5 +37,6 @@ ENV PORT=8080
 # Expose the port Cloud Run expects
 EXPOSE 8080
 
-# Run the MCP server (will use SSE transport when PORT env var is set)
-CMD ["uv", "run", "gti_mcp"]
+# Run the MCP server with uvicorn serving the ASGI app
+# The app is exposed at gti_mcp.server:app
+CMD ["uvicorn", "gti_mcp.server:app", "--host", "0.0.0.0", "--port", "8080"]
