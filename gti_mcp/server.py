@@ -54,7 +54,14 @@ from gti_mcp.tools import *
 
 # Run the server
 def main():
-  server.run(transport='stdio')
+  # Check if running in Cloud Run (or any environment with PORT env var)
+  port = os.getenv('PORT')
+  if port:
+    # Running in Cloud Run or similar - use SSE transport
+    server.run(transport='sse', port=int(port), host='0.0.0.0')
+  else:
+    # Running locally - use stdio transport
+    server.run(transport='stdio')
 
 
 if __name__ == '__main__':
