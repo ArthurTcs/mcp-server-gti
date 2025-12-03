@@ -87,7 +87,5 @@ try:
         app = server
 except Exception as e:
     logger.error(f"Error creating ASGI app: {e}")
-    # If we can't find the app, uvicorn will likely fail when importing 'app',
-    # but we want to allow the module to import successfully if just running main().
     app = None
 

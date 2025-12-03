@@ -20,7 +20,7 @@ classifiers = [
 dependencies = [
     "mcp",
     "vt-py",
-    "uvicorn[standard]"
+    "hypercorn"
 ]
 
 [project.urls]

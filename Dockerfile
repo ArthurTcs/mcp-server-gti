@@ -37,6 +37,6 @@ ENV PORT=8080
 # Expose the port Cloud Run expects
 EXPOSE 8080
 
-# Run the MCP server with uvicorn serving the ASGI app
-# The app is exposed at gti_mcp.server:app
-CMD ["uvicorn", "gti_mcp.server:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run the MCP server with hypercorn serving the ASGI app
+# Hypercorn supports HTTP/2 which might resolve 421 errors
+CMD ["hypercorn", "gti_mcp.server:app", "--bind", "0.0.0.0:8080"]
