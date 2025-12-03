@@ -18,6 +18,7 @@ RUN uv pip install --system .
 
 # Expose the port
 ENV PORT=8080
+ENV FORWARDED_ALLOW_IPS="*"
 EXPOSE 8080
 
 # Run the server using uvicorn
