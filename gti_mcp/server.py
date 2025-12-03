@@ -71,8 +71,10 @@ def main():
   
   if port:
     # Running in Cloud Run or similar - use SSE transport
+    # FastMCP uses environment variables for port configuration
     logger.info(f"Running in Cloud Run mode with SSE transport on 0.0.0.0:{port}")
-    server.run(transport='sse', port=int(port), host='0.0.0.0')
+    os.environ['HOST'] = '0.0.0.0'
+    server.run(transport='sse')
   else:
     # Running locally - use stdio transport
     logger.info("Running in local mode with stdio transport")
