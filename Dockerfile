@@ -31,9 +31,11 @@ RUN uv pip install --system -e .
 
 # Set environment variables for Cloud Run
 # STATELESS=1 ensures the server creates fresh transports for each request
+ENV STATELESS=1
 ENV PORT=8080
+
 # Expose the port Cloud Run expects
 EXPOSE 8080
 
-# Run the MCP server with SSE transport on /sse endpoint
-CMD ["uv", "run", "python", "-m", "mcp.server.fastmcp.sse_server", "gti_mcp.server:server", "--port", "8080", "--sse-path", "/sse"]
+# Run the MCP server (will use SSE transport when PORT env var is set)
+CMD ["uv", "run", "gti_mcp"]
