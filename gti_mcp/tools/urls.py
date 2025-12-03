@@ -17,7 +17,7 @@ import typing
 from mcp.server.fastmcp import Context
 
 from .. import utils
-from ..server import server, vt_client
+from ..fastmcp_instance import server, vt_client
 
 
 URL_RELATIONSHIPS = [
