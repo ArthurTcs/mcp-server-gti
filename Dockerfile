@@ -1,20 +1,24 @@
-
-# Use the official Python image.
-# https://hub.docker.com/_/python
+# Use a lightweight Python base image
 FROM python:3.11-slim
 
-# Allow statements and log messages to immediately appear in the Knative logs
-ENV PYTHONUNBUFFERED True
+# Set working directory
+WORKDIR /app
 
-# Copy local code to the container image.
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . ./
+# Install uv for fast package management
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Install production dependencies.
-RUN pip install --no-cache-dir .
+# Copy project files
+COPY pyproject.toml .
+COPY README.md .
+COPY gti_mcp/ gti_mcp/
 
-# Run the web service on container startup.
-# Use uvicorn to run the ASGI app.
-# The PORT environment variable is defined by Cloud Run (default 8080).
-CMD exec python -m gti_mcp.server
+# Install dependencies
+# We use --system to install into the system python, which is fine in a container
+RUN uv pip install --system .
+
+# Expose the port
+ENV PORT=8080
+EXPOSE 8080
+
+# Run the server using uvicorn
+CMD ["uvicorn", "gti_mcp.server:app", "--host", "0.0.0.0", "--port", "8080"]

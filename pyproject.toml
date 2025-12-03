@@ -9,11 +9,8 @@ description = "Google Threat Intelligence MCP server"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]",
-    "vt-py",
-    "uvicorn",
-    "starlette",
-    "python-dotenv"
+    "mcp[cli]>=1.4.1",
+    "vt-py"
 ]
 
 [project.optional-dependencies]
