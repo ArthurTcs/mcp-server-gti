@@ -56,6 +56,12 @@ from gti_mcp.tools import *
 def main():
   server.run(transport='stdio')
 
+# Create ASGI app for Cloud Run
+try:
+    app = server.create_asgi_app()
+except Exception as e:
+    logging.error(f"Error creating ASGI app: {e}")
+
 if __name__ == '__main__':
   import uvicorn
   import sys
@@ -67,19 +73,6 @@ if __name__ == '__main__':
   try:
     port = int(os.environ.get("PORT", 8080))
     logger.info(f"Starting server on port {port}")
-
-    # Robust ASGI app creation
-    if hasattr(server, 'create_asgi_app') and callable(server.create_asgi_app):
-        app = server.create_asgi_app()
-    elif hasattr(server, 'sse_app') and callable(server.sse_app):
-        app = server.sse_app()
-    elif hasattr(server, 'sse_app'):
-        app = server.sse_app
-    elif hasattr(server, '_mcp_server') and hasattr(server._mcp_server, 'app'):
-        app = server._mcp_server.app
-    else:
-        raise ValueError("Could not find ASGI app on FastMCP instance")
-
     uvicorn.run(app, host="0.0.0.0", port=port)
   except Exception as e:
     logger.exception("Failed to start server")
