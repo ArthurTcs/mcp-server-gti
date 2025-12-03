@@ -47,4 +47,5 @@ async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
 # Create a named server and specify dependencies for deployment and development
 server = FastMCP(
     "Google Threat Intelligence MCP server",
-    dependencies=["vt-py"])
+    log_level="ERROR"
+)
