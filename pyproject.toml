@@ -10,11 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "mcp",
-    "vt-py",
-    "uvicorn",
-    "starlette",
-    "python-dotenv",
-    "httpx"
+    "vt-py"
 ]
 
 [project.optional-dependencies]
