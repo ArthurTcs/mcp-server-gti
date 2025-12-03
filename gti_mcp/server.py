@@ -21,9 +21,33 @@ import os
 import vt
 
 from mcp.server.fastmcp import FastMCP, Context
-from gti_mcp.fastmcp_instance import server, vt_client
 
 logging.basicConfig(level=logging.ERROR)
+
+
+def _vt_client_factory(unused_ctx) -> vt.Client:
+  api_key = os.getenv("VT_APIKEY")
+  if not api_key:
+    raise ValueError("VT_APIKEY environment variable is required")
+  return vt.Client(api_key)
+
+vt_client_factory = _vt_client_factory
+
+
+@asynccontextmanager
+async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
+  """Provides a vt.Client instance for the current request."""
+  client = vt_client_factory(ctx)
+
+  try:
+    yield client
+  finally:
+    await client.close_async()
+
+# Create a named server and specify dependencies for deployment and development
+server = FastMCP(
+    "Google Threat Intelligence MCP server"
+)
 
 # Load tools.
 from gti_mcp.tools import *
@@ -31,7 +55,6 @@ from gti_mcp.tools import *
 # Run the server
 def main():
   server.run(transport='stdio')
-
 
 # Create ASGI app for Cloud Run
 app = None
