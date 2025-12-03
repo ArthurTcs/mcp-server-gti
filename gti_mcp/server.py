@@ -58,7 +58,9 @@ async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
 server = FastMCP(
     "Google Threat Intelligence MCP server",
     dependencies=["vt-py"],
-    stateless_http=stateless)
+    stateless_http=stateless,
+    host="0.0.0.0"  # Bind to all interfaces and disable default DNS rebinding protection
+)
 
 # Load tools.
 from gti_mcp.tools import *
