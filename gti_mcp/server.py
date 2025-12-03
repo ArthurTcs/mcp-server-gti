@@ -22,75 +22,40 @@ import vt
 
 from mcp.server.fastmcp import FastMCP, Context
 
-# Import tool modules
-from gti_mcp.tools import (
-    collections,
-    files,
-    intelligence,
-    netloc,
-    threat_profiles,
-    urls,
-)
-
 logging.basicConfig(level=logging.ERROR)
+
+
+def _vt_client_factory(unused_ctx) -> vt.Client:
+  api_key = os.getenv("VT_APIKEY")
+  if not api_key:
+    raise ValueError("VT_APIKEY environment variable is required")
+  return vt.Client(api_key)
+
+vt_client_factory = _vt_client_factory
+
+
+@asynccontextmanager
+async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
+  """Provides a vt.Client instance for the current request."""
+  client = vt_client_factory(ctx)
+
+  try:
+    yield client
+  finally:
+    await client.close_async()
 
 # Create a named server and specify dependencies for deployment and development
 server = FastMCP(
-    "Google Threat Intelligence MCP server"
-)
+    "Google Threat Intelligence MCP server",
+    dependencies=["vt-py"])
 
-# Register tools
-collections.register_tools(server)
-files.register_tools(server)
-intelligence.register_tools(server)
-netloc.register_tools(server)
-threat_profiles.register_tools(server)
-urls.register_tools(server)
+# Load tools.
+from gti_mcp.tools import *
 
 # Run the server
 def main():
   server.run(transport='stdio')
 
-# Create ASGI app for Cloud Run
-app = None
-try:
-    if hasattr(server, 'create_asgi_app') and callable(server.create_asgi_app):
-        app = server.create_asgi_app()
-    elif hasattr(server, 'sse_app') and callable(server.sse_app):
-        app = server.sse_app()
-    elif hasattr(server, 'sse_app'):
-        app = server.sse_app
-    elif hasattr(server, '_mcp_server') and hasattr(server._mcp_server, 'app'):
-        app = server._mcp_server.app
-except Exception as e:
-    logging.error(f"Error creating ASGI app: {e}")
-
-if app is None:
-    logging.warning("Could not create ASGI app from FastMCP. Falling back to Starlette.")
-    from starlette.applications import Starlette
-    from starlette.routing import Route
-    from starlette.responses import JSONResponse
-
-    async def health(request):
-        return JSONResponse({"status": "ok"})
-
-    app = Starlette(routes=[Route("/health", health)])
 
 if __name__ == '__main__':
-  import uvicorn
-  import sys
-
-  # Configure logging to ensure we see startup messages
-  logging.basicConfig(level=logging.INFO)
-  logger = logging.getLogger("gti_mcp.server")
-
-  try:
-    port = int(os.environ.get("PORT", 8080))
-    logger.info(f"Starting server on port {port}")
-    if app is None:
-        logger.error("Failed to initialize ASGI app. Exiting.")
-        sys.exit(1)
-    uvicorn.run(app, host="0.0.0.0", port=port)
-  except Exception as e:
-    logger.exception("Failed to start server")
-    sys.exit(1)
+  main()

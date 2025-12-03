@@ -15,10 +15,6 @@ import asyncio
 import logging
 import vt
 import typing
-import os
-from contextlib import asynccontextmanager
-from collections.abc import AsyncIterator
-from mcp.server.fastmcp import Context
 
 
 async def consume_vt_iterator(
@@ -28,26 +24,6 @@ async def consume_vt_iterator(
   async for obj in vt_client.iterator(endpoint, params=params, limit=limit):
     res.append(obj)
   return res
-
-
-def _vt_client_factory(unused_ctx) -> vt.Client:
-  api_key = os.getenv("VT_APIKEY")
-  if not api_key:
-    raise ValueError("VT_APIKEY environment variable is required")
-  return vt.Client(api_key)
-
-vt_client_factory = _vt_client_factory
-
-
-@asynccontextmanager
-async def vt_client(ctx: Context) -> AsyncIterator[vt.Client]:
-  """Provides a vt.Client instance for the current request."""
-  client = vt_client_factory(ctx)
-
-  try:
-    yield client
-  finally:
-    await client.close_async()
 
 
 async def fetch_object(
