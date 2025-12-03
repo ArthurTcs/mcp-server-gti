@@ -31,7 +31,7 @@ RUN uv pip install --system -e .
 
 # Set environment variables for Cloud Run
 # STATELESS=1 ensures the server creates fresh transports for each request
-
+ENV PORT=8080
 # Expose the port Cloud Run expects
 EXPOSE 8080
 
